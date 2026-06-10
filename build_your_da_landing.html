@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Your Digital Assistant — Unbox Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --violet: #8B5CF6;
+    --cyan: #06B6D4;
+    --white: #FFFFFF;
+    --off-white: #E8E8F0;
+    --muted: #9CA3AF;
+    --muted-dark: #6B7280;
+    --bg: #000000;
+    --surface: #0D0D14;
+    --surface-2: #13131E;
+    --border: rgba(139, 92, 246, 0.18);
+    --border-cyan: rgba(6, 182, 212, 0.18);
+    --grad: linear-gradient(135deg, #8B5CF6 0%, #06B6D4 100%);
+    --grad-text: linear-gradient(90deg, #8B5CF6 0%, #06B6D4 100%);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── UTILITY ─── */
+  .grad-text {
+    background: var(--grad-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .grad-border {
+    position: relative;
+    border-radius: 16px;
+  }
+  .grad-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: var(--grad);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  /* ─── NAV ─── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(139,92,246,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .nav-logo span { color: var(--white); }
+
+  .nav-cta {
+    display: inline-block;
+    padding: 9px 22px;
+    border-radius: 50px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+    background: var(--grad);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.15) 0%, rgba(6,182,212,0.06) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 18px;
+    border-radius: 50px;
+    background: rgba(139,92,246,0.1);
+    border: 1px solid rgba(139,92,246,0.25);
+    font-size: 13px;
+    font-weight: 500;
+    color: #C4B5FD;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .hero-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--cyan);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 700;
+    line-height: 1.0;
+    letter-spacing: -0.03em;
+    max-width: 900px;
+    margin-bottom: 28px;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 52px;
+    font-weight: 400;
+    line-height: 1.65;
+  }
+
+  .hero-dates {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 48px;
+  }
+
+  .date-card {
+    padding: 16px 28px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  .date-card .cohort-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  .date-card .date-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .date-card .cohort-desc {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 14px 36px;
+    border-radius: 50px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    background: var(--grad);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .btn-ghost:hover { color: var(--white); }
+
+  .seats-note {
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--muted-dark);
+  }
+  .seats-note strong { color: var(--muted); }
+
+  /* ─── SECTIONS ─── */
+  section {
+    padding: 96px 24px;
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .section-body {
+    font-size: 17px;
+    color: var(--muted);
+    max-width: 620px;
+    line-height: 1.75;
+  }
+
+  hr.divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin: 0;
+  }
+
+  /* ─── PROMISE ─── */
+  .promise-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+  @media (max-width: 700px) {
+    .promise-wrap { grid-template-columns: 1fr; gap: 40px; }
+  }
+
+  .promise-quote {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(22px, 3vw, 32px);
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--white);
+    letter-spacing: -0.01em;
+  }
+  .promise-quote em {
+    font-style: normal;
+    background: var(--grad-text);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── WHAT YOU BUILD ─── */
+  .build-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  .build-card {
+    padding: 28px 24px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.25s;
+  }
+  .build-card:hover { border-color: rgba(139,92,246,0.4); }
+
+  .build-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--violet);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+
+  .build-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--white);
+  }
+
+  .build-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ─── WHAT YOU LEAVE WITH ─── */
+  .leave-list {
+    margin-top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .leave-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .leave-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .leave-content h3 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--white);
+  }
+  .leave-content p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+  }
+
+  /* ─── FORMAT ─── */
+  .format-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 48px;
+  }
+
+  .format-cell {
+    padding: 24px 20px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .format-cell .f-label {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted-dark);
+    margin-bottom: 8px;
+  }
+  .format-cell .f-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    line-height: 1.3;
+  }
+
+  /* ─── WHO IS THIS FOR ─── */
+  .for-wrap {
+    margin-top: 48px;
+    padding: 40px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .for-wrap::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(6,182,212,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .for-tagline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(18px, 2.5vw, 26px);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--white);
+    max-width: 680px;
+    margin-bottom: 28px;
+  }
+
+  .for-indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.15);
+    font-size: 14px;
+    color: #C4B5FD;
+  }
+
+  /* ─── FACILITATOR ─── */
+  .facilitator-card {
+    margin-top: 48px;
+    padding: 40px;
+    border-radius: 16px;
+    background: var(--surface);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 32px;
+    align-items: start;
+    position: relative;
+  }
+  @media (max-width: 600px) {
+    .facilitator-card { grid-template-columns: 1fr; }
+  }
+
+  .facilitator-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    padding: 1px;
+    background: var(--grad);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .fac-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8B5CF6, #06B6D4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    flex-shrink: 0;
+  }
+
+  .fac-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .fac-role {
+    font-size: 14px;
+    color: var(--cyan);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+
+  .fac-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .fac-tag {
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(6,182,212,0.1);
+    border: 1px solid rgba(6,182,212,0.2);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--cyan);
+  }
+
+  .fac-bio {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ─── NOT THIS ─── */
+  .not-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 48px;
+  }
+
+  .not-card {
+    padding: 24px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .not-card .not-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: line-through;
+    text-decoration-color: rgba(139,92,246,0.5);
+    margin-bottom: 8px;
+  }
+  .not-card .not-desc {
+    font-size: 14px;
+    color: var(--muted-dark);
+    line-height: 1.6;
+  }
+
+  /* ─── CTA ─── */
+  .cta-section {
+    padding: 100px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-glow {
+    position: absolute;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, rgba(6,182,212,0.05) 50%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-inner {
+    position: relative;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .cta-tagline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+
+  .cta-sub {
+    font-size: 17px;
+    color: var(--muted);
+    margin-bottom: 44px;
+    line-height: 1.65;
+  }
+
+  .cta-contact {
+    margin-top: 32px;
+    font-size: 14px;
+    color: var(--muted-dark);
+  }
+  .cta-contact a {
+    color: var(--cyan);
+    text-decoration: none;
+  }
+  .cta-contact a:hover { text-decoration: underline; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 36px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .footer-brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    color: var(--muted-dark);
+  }
+  .footer-brand span { color: var(--muted); font-weight: 500; }
+
+  .footer-copy {
+    font-size: 13px;
+    color: var(--muted-dark);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .for-wrap, .facilitator-card { padding: 28px 20px; }
+    section { padding: 64px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo"><span>Unbox</span> Experience</div>
+  <a href="#register" class="nav-cta">Reserve Your Seat</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="max-width:none; padding-top:140px;">
+  <div class="hero-glow"></div>
+
+  <div class="hero-pill">
+    <span class="dot"></span>
+    Two Cohorts · July 2025 · Bangalore
+  </div>
+
+  <h1>
+    Build Your<br>
+    <span class="grad-text">Digital Assistant</span>
+  </h1>
+
+  <p class="hero-sub">
+    A one-day, hands-on build for founders and senior leaders.<br>
+    Leave with an AI that knows you — your context, your voice, your judgment.
+  </p>
+
+  <div class="hero-dates">
+    <div class="date-card">
+      <div class="cohort-label">Cohort 1</div>
+      <div class="date-val">11 July 2025</div>
+      <div class="cohort-desc">Founders</div>
+    </div>
+    <div class="date-card">
+      <div class="cohort-label">Cohort 2</div>
+      <div class="date-val">25 July 2025</div>
+      <div class="cohort-desc">Senior GCC Leaders</div>
+    </div>
+  </div>
+
+  <div class="hero-actions">
+    <a href="#register" class="btn-primary">Reserve Your Seat</a>
+    <a href="#what-you-build" class="btn-ghost">
+      See what you build
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3l5 5-5 5M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+
+  <p class="seats-note">Capped at <strong>10 participants</strong> per cohort. Hands-on, focused.</p>
+</section>
+
+<hr class="divider">
+
+<!-- THE PROMISE -->
+<section>
+  <div class="promise-wrap">
+    <div>
+      <div class="section-label grad-text">The Promise</div>
+      <p class="promise-quote">
+        By the time you leave the room, you will have your own Digital Assistant: one that knows you, your context, your standards — and <em>gets sharper every week</em> it spends with you.
+      </p>
+    </div>
+    <div class="section-body" style="max-width:100%;">
+      This is not a chatbot. Not a productivity tool. It is a peer-shaped piece of software that understands the difference between what you said and what you meant.<br><br>
+      The binding constraint for people in this room is no longer information. It is judgment, attention, and the cost of context-switching. The DA is built for that.
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHO IT'S FOR -->
+<section>
+  <div class="section-label grad-text">Who This Is For</div>
+  <h2 class="section-title">People for whom the binding constraint is no longer information.</h2>
+
+  <div class="for-wrap">
+    <p class="for-tagline">
+      People for whom the binding constraint is no longer information — it is judgment, attention, and the cost of context-switching.
+    </p>
+    <div class="for-indicators">
+      <div class="indicator">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#8B5CF6" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3" stroke="#8B5CF6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Founders &amp; Operators
+      </div>
+      <div class="indicator">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#8B5CF6" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3" stroke="#8B5CF6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        GCC &amp; Strategy Leaders
+      </div>
+      <div class="indicator">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#8B5CF6" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3" stroke="#8B5CF6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Senior Leaders in Complex Roles
+      </div>
+      <div class="indicator">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#8B5CF6" stroke-width="1.2"/><path d="M4.5 7l2 2 3-3" stroke="#8B5CF6" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        CXOs across BFSI &amp; Digital-Native Sectors
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHAT YOU BUILD -->
+<section id="what-you-build">
+  <div class="section-label grad-text">What You Build</div>
+  <h2 class="section-title">Four parts. All owned by you.</h2>
+  <p class="section-body">Your Digital Assistant is not a feature collection. It is a second brain you point at any transition — from current state to ideal state — again and again.</p>
+
+  <div class="build-grid">
+    <div class="build-card">
+      <div class="build-num">01 · Knowledge</div>
+      <div class="build-title">A Knowledge of You</div>
+      <p class="build-desc">Mission, role, current projects, the people who matter, the work you are protecting.</p>
+    </div>
+    <div class="build-card">
+      <div class="build-num">02 · Constitution</div>
+      <div class="build-title">Your Rules, Your Words</div>
+      <p class="build-desc">Your rules, written in your words. What it may do. What it must never do. What it should push back on.</p>
+    </div>
+    <div class="build-card">
+      <div class="build-num">03 · Library</div>
+      <div class="build-title">Your Workflow Library</div>
+      <p class="build-desc">The handful of repeatable moves your day is actually made of — captured, named, and delegated.</p>
+    </div>
+    <div class="build-card">
+      <div class="build-num">04 · Memory</div>
+      <div class="build-title">Pattern Memory</div>
+      <p class="build-desc">It watches your interactions and starts connecting dots.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHAT YOU LEAVE WITH -->
+<section>
+  <div class="section-label grad-text">What You Leave With</div>
+  <h2 class="section-title">Installed. Running. Yours.</h2>
+
+  <div class="leave-list">
+    <div class="leave-item">
+      <div class="leave-icon">🤖</div>
+      <div class="leave-content">
+        <h3>Personalised Digital Assistant — installed and running</h3>
+        
+      </div>
+    </div>
+    <div class="leave-item">
+      <div class="leave-icon">📚</div>
+      <div class="leave-content">
+        <h3>Workflow library — at least three repeating moves</h3>
+        
+      </div>
+    </div>
+    <div class="leave-item">
+      <div class="leave-icon">🔒</div>
+      <div class="leave-content">
+        <h3>Privacy &amp; security configuration — authored by you</h3>
+        
+      </div>
+    </div>
+    <div class="leave-item">
+      <div class="leave-icon">📅</div>
+      <div class="leave-content">
+        <h3>30-day sharpening cadence</h3>
+        
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- FORMAT -->
+<section>
+  <div class="section-label grad-text">Format</div>
+  <h2 class="section-title">One day. In person.</h2>
+
+  <div class="format-row">
+    <div class="format-cell">
+      <div class="f-label">Duration</div>
+      <div class="f-val">One Day<br><span style="font-size:13px;color:var(--muted);font-weight:400">In person</span></div>
+    </div>
+    <div class="format-cell">
+      <div class="f-label">Cohort Size</div>
+      <div class="f-val">Capped at 12<br><span style="font-size:13px;color:var(--muted);font-weight:400">High-impact, focused</span></div>
+    </div>
+    <div class="format-cell">
+      <div class="f-label">What to Bring</div>
+      <div class="f-val">Your Laptop<br><span style="font-size:13px;color:var(--muted);font-weight:400">Hands-on build</span></div>
+    </div>
+    <div class="format-cell">
+      <div class="f-label">Before You Arrive</div>
+      <div class="f-val">Pre-Workshop Brief<br><span style="font-size:13px;color:var(--muted);font-weight:400">Sent 7 days prior</span></div>
+    </div>
+    <div class="format-cell">
+      <div class="f-label">After the Day</div>
+      <div class="f-val">Private Community<br><span style="font-size:13px;color:var(--muted);font-weight:400">Post-workshop access</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- FACILITATOR -->
+<section>
+  <div class="section-label grad-text">Your Expert &amp; Guide</div>
+  <h2 class="section-title">Who you'll build with</h2>
+
+  <div class="facilitator-card">
+    <div class="fac-avatar">LK</div>
+    <div>
+      <div class="fac-name">Lalit Kumar</div>
+      <div class="fac-role">AI Architect · Head of Security, AWS India (11 yrs)</div>
+      <div class="fac-tags">
+        <span class="fac-tag">AI Agents</span>
+        <span class="fac-tag">n8n Automation</span>
+        <span class="fac-tag">LLM Engineering</span>
+        <span class="fac-tag">AWS</span>
+      </div>
+      <p class="fac-bio">20+ years in cloud security. Transformed AWS India's Security Division. Works with CXOs across BFSI, government, and digital-native sectors to build AI systems that lead.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- WHAT THIS IS NOT -->
+<section>
+  <div class="section-label grad-text">What This Is Not</div>
+  <h2 class="section-title">No demos. No curriculum. No theory.</h2>
+
+  <div class="not-grid">
+    <div class="not-card">
+      <div class="not-title">A tools demo</div>
+      <div class="not-desc">There are no vendor stickers on any slide.</div>
+    </div>
+    <div class="not-card">
+      <div class="not-title">An AI curriculum</div>
+      <div class="not-desc">You will not be quizzed on transformer architecture.</div>
+    </div>
+    <div class="not-card">
+      <div class="not-title">A theoretical exercise</div>
+      <div class="not-desc">By 18:00 your DA is reading your inbox, with permissions you wrote.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CTA -->
+<section class="cta-section" id="register" style="max-width:none;">
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <h2 class="cta-tagline">
+      Build it once.<br>
+      <span class="grad-text">Lead with it forever.</span>
+    </h2>
+    <p class="cta-sub">
+      Two cohorts. Ten seats each. Both in July, Bangalore.<br>
+      Seats are limited by design — this only works when everyone is in the room.
+    </p>
+    <a href="mailto:jenny@unboxexperience.com?subject=Reserve%20my%20seat%20-%20Build%20Your%20Digital%20Assistant" class="btn-primary">
+      Reserve My Seat
+    </a>
+    <p class="cta-contact">
+      Questions? Write to <a href="mailto:jenny@unboxexperience.com">jenny@unboxexperience.com</a>
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <span>Unbox Experience</span> · Leadership &amp; Capability Development
+  </div>
+  <div class="footer-copy">Bangalore, India · 2025</div>
+</footer>
+
+</body>
+</html>
