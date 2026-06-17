@@ -16,7 +16,7 @@ return path.resolve(__dirname, 'src/assets', filename)
 }
 
 export default defineConfig({
-base: '/Unbox_Landing_Pages/',
+base: '/Build-Your-AI-Twin/',
 
 plugins: [
 figmaAssetResolver(),
